@@ -1,0 +1,58 @@
+{
+  "name": "annotatedtext-sitter",
+  "version": "0.0.1",
+  "description": "Convert various language / format ASTs into AnnotateText using Tree Sitter.",
+  "type": "module",
+  "exports": [
+    "./out/*.js",
+    "./types/*.d.ts"
+  ],
+  "types": "types/*.d.ts",
+  "files": [
+    "out/**/*",
+    "types/*.d.ts"
+  ],
+  "scripts": {
+    "test": "mocha --reporter spec ./tests/html.js",
+    "clean": "rm -rf out/*",
+    "build": "tsc",
+    "rebuild": "npm run clean && npm run build",
+    "lint": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prosegrinder/annotatedtext-sitter.git"
+  },
+  "keywords": [
+    "annotatedtext",
+    "tree-sitter"
+  ],
+  "author": "David L. Day <david@davidlday.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/prosegrinder/annotatedtext-sitter/issues"
+  },
+  "homepage": "https://github.com/prosegrinder/annotatedtext-sitter#readme",
+  "devDependencies": {
+    "@eslint/core": "^0.6.0",
+    "@eslint/js": "^9.9.1",
+    "@types/chai": "^4.3.1",
+    "@types/eslint__js": "^8.42.3",
+    "@types/mocha": "^10.0.3",
+    "@types/node": "^22.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.2.0",
+    "@typescript-eslint/parser": "^8.2.0",
+    "chai": "^5.1.0",
+    "eslint": "^9.9.1",
+    "eslint-plugin-jsdoc": "^50.2.2",
+    "eslint-plugin-tsdoc": "^0.3.0",
+    "mocha": "^10.2.0",
+    "typedoc": "^0.26.3",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.4.0"
+  },
+  "dependencies": {
+    "tree-sitter": "^0.21.1",
+    "tree-sitter-html": "^0.23.0"
+  }
+}
