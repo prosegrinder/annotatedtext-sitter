@@ -50,46 +50,27 @@ export interface IAnnotatedtext {
 }
 
 /**
- * @interface INode
- * @property {INode[]} children An array of child nodes.
- * @property {string} type The type of the node.
- * @property {object} position The position of the node in the text.
- * @property {object} position.end The end position of the node in the text.
- * @property {number} position.end.offset The end offset of the node in the
- *  text.
- * @property {object} position.start The start position of the node in the text.
- * @property {number} position.start.offset The start offset of the node in the
- *  text.
- */
-export interface INode {
-  children: INode[];
-  type: string;
-  position: {
-    end: {
-      offset: number;
-    };
-    start: {
-      offset: number;
-    };
-  };
-}
-
-/**
  * Compose an annotated text from an AST and some text
  * suitable for use with LanguageTool.
  *
  * @param text The text to parse.
  * @param nodes The AST to use.
+ * @param interpretAs Function to use to interpret markup where needed.
+ * @param nodeTypes List of node types to treat as text.
  * @returns An annotated text suitable for use with LanguageTool.
  *
  */
-export function compose(text: string, nodes: SyntaxNode): IAnnotatedtext;
+export function compose(
+  text: string,
+  nodes: SyntaxNode,
+  intepretAs: () => string,
+  nodeTypes: string[],
+): IAnnotatedtext;
 
 /**
- * Build an annotated text from a HTML string using the rehype parser.
- * @function build
+ * Build an annotated text from a HTML string using the treesitter parser.
+ * @function annotatedHtml
  * @param text The HTML string to parse.
- * @param options The options to use.
  * @returns The annotated text.
  */
-export function buildHtml(text: string, parse: unknown): IAnnotatedtext;
+export function annotatedHtml(text: string): IAnnotatedtext;
