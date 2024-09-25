@@ -1,12 +1,12 @@
 import { IAnnotatedtext, IAnnotation } from "../types";
 import { Tree, SyntaxNode } from "tree-sitter";
 
-function interpretmarkup(text: string = "") {
-  return text;
-}
-
-function annotatedttextnode(node: SyntaxNode, text: string) {
-  if (node.type === "text") {
+function annotatedttextnode(
+  node: SyntaxNode,
+  text: string,
+  nodeTypes: string[],
+) {
+  if (nodeTypes.includes(node.type)) {
     return {
       offset: {
         end: node.endIndex,
@@ -19,17 +19,21 @@ function annotatedttextnode(node: SyntaxNode, text: string) {
   }
 }
 
-function collecttextnodes(tree: Tree, text: string): IAnnotation[] {
+function collecttextnodes(
+  tree: Tree,
+  text: string,
+  nodeTypes: string[],
+): IAnnotation[] {
   const textannotations: IAnnotation[] = [];
 
   function recurse(node: SyntaxNode) {
-    const annotation = annotatedttextnode(node, text);
+    const annotation = annotatedttextnode(node, text, nodeTypes);
     if (annotation !== null) {
       textannotations.push(annotation);
     }
     const children: SyntaxNode[] = node.children;
     if (children !== null && Array.isArray(children)) {
-      children.forEach(recurse);
+      children.forEach((child: SyntaxNode) => recurse(child));
     }
   }
 
@@ -41,6 +45,7 @@ function collecttextnodes(tree: Tree, text: string): IAnnotation[] {
 function composeannotation(
   text: string,
   annotatedtextnodes: IAnnotation[],
+  interpretAs: (markup: string) => string,
 ): IAnnotatedtext {
   const annotations: IAnnotation[] = [];
   let prior: IAnnotation = {
@@ -52,7 +57,7 @@ function composeannotation(
   for (const current of annotatedtextnodes) {
     const currenttext = text.substring(prior.offset.end, current.offset.start);
     annotations.push({
-      interpretAs: interpretmarkup(currenttext),
+      interpretAs: interpretAs(currenttext),
       markup: currenttext,
       offset: {
         end: current.offset.start,
@@ -65,7 +70,7 @@ function composeannotation(
   // Always add a final markup node to ensure trailing whitespace is added.
   const finaltext = text.substring(prior.offset.end, text.length);
   annotations.push({
-    interpretAs: interpretmarkup(finaltext),
+    interpretAs: interpretAs(finaltext),
     markup: finaltext,
     offset: {
       end: text.length,
@@ -75,9 +80,14 @@ function composeannotation(
   return { annotation: annotations };
 }
 
-function compose(text: string, tree: Tree): IAnnotatedtext {
-  const textnodes: IAnnotation[] = collecttextnodes(tree, text);
-  return composeannotation(text, textnodes);
+function compose(
+  text: string,
+  tree: Tree,
+  interpretAs: (markup: string) => string,
+  nodeTypes: string[],
+): IAnnotatedtext {
+  const textnodes: IAnnotation[] = collecttextnodes(tree, text, nodeTypes);
+  return composeannotation(text, textnodes, interpretAs);
 }
 
 export { compose };
