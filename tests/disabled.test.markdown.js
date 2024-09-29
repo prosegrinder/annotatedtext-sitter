@@ -1,5 +1,5 @@
 import * as chai from "chai";
-import annotatedMarkdown from "../out/markdown.js";
+import * as annotatedSitter from "../out/index.js";
 import fs from "fs";
 
 describe("#annotatedMarkdown()", function () {
@@ -9,7 +9,7 @@ describe("#annotatedMarkdown()", function () {
       fs.readFileSync("./tests/markdown/annotatedtext-original.json", "utf8"),
     );
     const text = fs.readFileSync("./tests/markdown/test-original.md", "utf8");
-    const result = annotatedMarkdown(text);
+    const result = annotatedSitter.getNodesFromSource(text, "markdown");
     // fs.writeFileSync(
     //   "./out/annotatedtext-original.json",
     //   JSON.stringify(result, null, 2),
@@ -19,7 +19,7 @@ describe("#annotatedMarkdown()", function () {
 
   it("should match the original document exactly", function () {
     const expected = fs.readFileSync("./tests/markdown/test-original.md", "utf8");
-    const annotatedtext = annotatedMarkdown(expected);
+    const annotatedtext = annotatedSitter.getNodesFromSource(expected, "markdown");
     const annotation = annotatedtext.annotation;
     let result = "";
     for (let node of annotation) {
@@ -35,7 +35,7 @@ describe("#annotatedMarkdown()", function () {
       fs.readFileSync("./tests/markdown/annotatedtext-frontmatter.json", "utf8"),
     );
     const text = fs.readFileSync("./tests/markdown/test-frontmatter.md", "utf8");
-    const result = annotatedMarkdown(text);
+    const result = annotatedSitter.getNodesFromSource(text, "markdown");
     // fs.writeFileSync(
     //   "./out/annotatedtext-frontmatter.json",
     //   JSON.stringify(result, null, 2),
@@ -45,7 +45,7 @@ describe("#annotatedMarkdown()", function () {
 
   it("should match the original document exactly with frontmatter", function () {
     const expected = fs.readFileSync("./tests/markdown/test-frontmatter.md", "utf8");
-    const annotatedtext = annotatedMarkdown(expected);
+    const annotatedtext = annotatedSitter.getNodesFromSource(expected, "markdown");
     const annotation = annotatedtext.annotation;
     let result = "";
     for (let node of annotation) {
@@ -61,7 +61,7 @@ describe("#annotatedMarkdown()", function () {
       fs.readFileSync("./tests/markdown/escape-character.json", "utf8"),
     );
     const text = fs.readFileSync("./tests/markdown/escape-character.md", "utf8");
-    const result = annotatedMarkdown(text);
+    const result = annotatedSitter.getNodesFromSource(text, "markdown");
     // fs.writeFileSync(
     //   "./out/escape-character.json",
     //   JSON.stringify(result, null, 2),
@@ -71,7 +71,7 @@ describe("#annotatedMarkdown()", function () {
 
   it("should match the original document exactly with the escape character", function () {
     const expected = fs.readFileSync("./tests/markdown/escape-character.md", "utf8");
-    const annotatedtext = annotatedMarkdown(expected);
+    const annotatedtext = annotatedSitter.getNodesFromSource(expected, "markdown");
     const annotation = annotatedtext.annotation;
     let result = "";
     for (let node of annotation) {

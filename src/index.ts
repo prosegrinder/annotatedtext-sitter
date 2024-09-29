@@ -1,93 +1,97 @@
-import { IAnnotatedtext, IAnnotation } from "../types";
-import { Tree, SyntaxNode } from "tree-sitter";
+import Parser, { SyntaxNode } from "tree-sitter";
+import Html from "tree-sitter-html";
+import Markdown from "@tree-sitter-grammars/tree-sitter-markdown";
+import { IAnnotatedtext, IAnnotation, ILanguageConfig } from "../types";
 
-function annotatedttextnode(
-  node: SyntaxNode,
+export const registry: Record<string, ILanguageConfig> = {
+  html: {
+    grammar: Html,
+    textTypes: ["text"],
+    markupTypes: ["start_tag", "end_tag"],
+    interpretMarkup: (node) => {
+      const countP = (node.text.match(/<\/p>/g) || []).length;
+      const countH = (node.text.match(/<\/h\d+>/g) || []).length;
+      const countBr = (node.text.match(/<br[\s/]*>/g) || []).length;
+      return "\n".repeat(2 * countP + 2 * countH + countBr);
+    },
+    inSourceGrammars: [],
+    inSourceNodeType: "",
+    inSourceNodeTypePrefix: "",
+  },
+  markdown: {
+    grammar: Markdown,
+    textTypes: ["comment", "line_comment", "@comment", "text"],
+    markupTypes: ["start_tag", "end_tag"],
+    interpretMarkup: (node) => {
+      return "\n".repeat((node.text.match(/\n/g) || []).length);
+    },
+    inSourceGrammars: [Markdown.inline],
+    inSourceNodeType: "inline",
+    inSourceNodeTypePrefix: "",
+  },
+};
+
+export function getNodesFromSource(
+  language: string,
   text: string,
-  nodeTypes: string[],
-) {
-  if (nodeTypes.includes(node.type)) {
-    return {
-      offset: {
-        end: node.endIndex,
-        start: node.startIndex,
-      },
-      text: text.substring(node.startIndex, node.endIndex),
-    };
-  } else {
-    return null;
-  }
-}
-
-function collecttextnodes(
-  tree: Tree,
-  text: string,
-  nodeTypes: string[],
-): IAnnotation[] {
-  const textannotations: IAnnotation[] = [];
-
-  function recurse(node: SyntaxNode) {
-    const annotation = annotatedttextnode(node, text, nodeTypes);
-    if (annotation !== null) {
-      textannotations.push(annotation);
-    }
-    const children: SyntaxNode[] = node.children;
-    if (children !== null && Array.isArray(children)) {
-      children.forEach((child: SyntaxNode) => recurse(child));
-    }
-  }
-
-  const root = tree.rootNode;
-  recurse(root);
-  return textannotations;
-}
-
-function composeannotation(
-  text: string,
-  annotatedtextnodes: IAnnotation[],
-  interpretAs: (markup: string) => string,
+  includeMarkup: boolean = true,
 ): IAnnotatedtext {
+  const languageConfig: ILanguageConfig = registry[language];
   const annotations: IAnnotation[] = [];
-  let prior: IAnnotation = {
-    offset: {
-      end: 0,
-      start: 0,
-    },
-  };
-  for (const current of annotatedtextnodes) {
-    const currenttext = text.substring(prior.offset.end, current.offset.start);
-    annotations.push({
-      interpretAs: interpretAs(currenttext),
-      markup: currenttext,
-      offset: {
-        end: current.offset.start,
-        start: prior.offset.end,
-      },
+  const parser = new Parser();
+  parser.setLanguage(languageConfig.grammar);
+  const tree = parser.parse(text);
+
+  function parseNode(node: SyntaxNode) {
+    if (node.previousSibling) {
+      if (node.previousSibling.endPosition.row != node.startPosition.row) {
+        const lfBuffer: IAnnotation = {
+          text: "\n",
+          offset: {
+            start: node.previousSibling.endIndex,
+            end: node.startIndex,
+          },
+        };
+        annotations.push(lfBuffer);
+      }
+    }
+    if (languageConfig.textTypes.includes(node.type)) {
+      const annotatedtext: IAnnotation = {
+        text: node.text,
+        offset: {
+          start: node.startIndex,
+          end: node.endIndex,
+        },
+      };
+      annotations.push(annotatedtext);
+    } else if (
+      includeMarkup &&
+      languageConfig.markupTypes.includes(node.type)
+    ) {
+      const annotatedmarkup: IAnnotation = {
+        interpretAs: languageConfig.interpretMarkup(node),
+        markup: node.text,
+        offset: {
+          start: node.startIndex,
+          end: node.endIndex,
+        },
+      };
+      annotations.push(annotatedmarkup);
+    }
+    node.children.forEach((child) => {
+      parseNode(child);
     });
-    annotations.push(current);
-    prior = current;
   }
-  // Always add a final markup node to ensure trailing whitespace is added.
-  const finaltext = text.substring(prior.offset.end, text.length);
-  annotations.push({
-    interpretAs: interpretAs(finaltext),
-    markup: finaltext,
-    offset: {
-      end: text.length,
-      start: prior.offset.end,
-    },
-  });
+  parseNode(tree.rootNode);
+  if (text.endsWith("\n")) {
+    const finalBuffer: IAnnotation = {
+      text: "\n",
+      offset: {
+        start: tree.rootNode.endIndex,
+        end: text.length + 1,
+      },
+    };
+    annotations.push(finalBuffer);
+  }
   return { annotation: annotations };
 }
-
-function compose(
-  text: string,
-  tree: Tree,
-  interpretAs: (markup: string) => string,
-  nodeTypes: string[],
-): IAnnotatedtext {
-  const textnodes: IAnnotation[] = collecttextnodes(tree, text, nodeTypes);
-  return composeannotation(text, textnodes, interpretAs);
-}
-
-export { compose };

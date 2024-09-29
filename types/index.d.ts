@@ -49,28 +49,53 @@ export interface IAnnotatedtext {
   annotation: IAnnotation[];
 }
 
-/**
- * Compose an annotated text from an AST and some text
- * suitable for use with LanguageTool.
- *
- * @param text The text to parse.
- * @param nodes The AST to use.
- * @param interpretAs Function to use to interpret markup where needed.
- * @param nodeTypes List of node types to treat as text.
- * @returns An annotated text suitable for use with LanguageTool.
- *
- */
-export function compose(
-  text: string,
-  nodes: SyntaxNode,
-  intepretAs: () => string,
-  nodeTypes: string[],
-): IAnnotatedtext;
+// export enum languages {
+//   html,
+//   // Markdown = "markdown",
+//   // Python = "python",
+// }
 
-/**
- * Build an annotated text from a HTML string using the treesitter parser.
- * @function annotatedHtml
- * @param text The HTML string to parse.
- * @returns The annotated text.
- */
-export function annotatedHtml(text: string): IAnnotatedtext;
+export interface ILanguageConfig {
+  grammar: unknown;
+  textTypes: string[];
+  markupTypes: string[];
+  interpretMarkup: (node: SyntaxNode) => string;
+  inSourceGrammars: unknown[];
+  inSourceNodeType: string;
+  inSourceNodeTypePrefix: string;
+}
+
+// /**
+//  * Compose an annotated text from an AST and some text
+//  * suitable for use with LanguageTool.
+//  *
+//  * @param text The text to parse.
+//  * @param nodes The AST to use.
+//  * @param interpretAs Function to use to interpret markup where needed.
+//  * @param nodeTypes List of node types to treat as text.
+//  * @returns An annotated text suitable for use with LanguageTool.
+//  *
+//  */
+// export function compose(
+//   text: string,
+//   nodes: SyntaxNode,
+//   intepretAs: () => string,
+//   nodeTypes: string[],
+// ): IAnnotatedtext;
+
+// /**
+//  * Build an annotated text from a HTML string using the treesitter parser.
+//  * @function annotatedHtml
+//  * @param text The HTML string to parse.
+//  * @returns The annotated text.
+//  */
+// export function annotatedHtml(text: string): IAnnotatedtext;
+
+export const registry: Record<string, ILanguageConfig>;
+
+export function getNodesFromSource(
+  language: string,
+  text: string,
+  row: number,
+  column: number,
+): IAnnotatedtext;
