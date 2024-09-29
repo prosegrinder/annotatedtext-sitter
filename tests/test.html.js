@@ -3,7 +3,7 @@ import * as chai from "chai";
 import * as annotatedSitter from "../out/index.js";
 import fs from "node:fs";
 
-describe("#annotatedHtml()", function () {
+describe("#Html()", function () {
   it("should return the expected annotated text object", function () {
     const expected = JSON.parse(
       fs.readFileSync("./tests/html/basic.json", "utf8"),
@@ -11,7 +11,7 @@ describe("#annotatedHtml()", function () {
     const text = fs.readFileSync("./tests/html/basic.html", "utf8");
     const result = annotatedSitter.getNodesFromSource("html", text);
     fs.writeFileSync(
-      "./out/annotatedtext-original.json",
+      "./out/html-basic.json",
       JSON.stringify(result, null, 2),
     );
     chai.expect(result).to.deep.equal(expected);
@@ -27,7 +27,7 @@ describe("#annotatedHtml()", function () {
       result += text;
     }
     fs.writeFileSync(
-      "./out/basic.html",
+      "./out/html-basic.html",
       result,
     );
     chai.expect(result).to.equal(expected);
@@ -40,7 +40,7 @@ describe("#annotatedHtml()", function () {
     const text = fs.readFileSync("./tests/html/backslashes.html", "utf8");
     const result = annotatedSitter.getNodesFromSource("html", text);
     fs.writeFileSync(
-      "./out/annotatedtext-backslashes.json",
+      "./out/html-backslashes.json",
       JSON.stringify(result, null, 2),
     );
     chai.expect(result).to.deep.equal(expected);
@@ -56,7 +56,7 @@ describe("#annotatedHtml()", function () {
       result += text;
     }
     fs.writeFileSync(
-      "./out/backslashes.html",
+      "./out/html-backslashes.html",
       result,
     );
     chai.expect(result).to.equal(expected);
