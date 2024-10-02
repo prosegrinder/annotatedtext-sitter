@@ -6,13 +6,17 @@ import { IAnnotatedtext, IAnnotation, ILanguageConfig } from "../types";
 export const registry: Record<string, ILanguageConfig> = {
   html: {
     grammar: Html,
-    textTypes: ["text"],
+    textTypes: ["comment", "line_comment", "@comment", "text"],
     markupTypes: ["start_tag", "end_tag"],
     interpretMarkup: (node) => {
-      const countP = (node.text.match(/<\/p>/g) || []).length;
-      const countH = (node.text.match(/<\/h\d+>/g) || []).length;
-      const countBr = (node.text.match(/<br[\s/]*>/g) || []).length;
-      return "\n".repeat(2 * countP + 2 * countH + countBr);
+      if (node.type == "end_tag") {
+        const countP = (node.text.match(/<\/p>/g) || []).length;
+        const countH = (node.text.match(/<\/h\d+>/g) || []).length;
+        const countBr = (node.text.match(/<br[\s/]*>/g) || []).length;
+        return "\n".repeat(2 * countP + 2 * countH + countBr);
+      } else {
+        return "";
+      }
     },
     inSourceGrammars: [],
     inSourceNodeType: "",
@@ -23,7 +27,11 @@ export const registry: Record<string, ILanguageConfig> = {
     textTypes: ["comment", "line_comment", "@comment", "text"],
     markupTypes: ["start_tag", "end_tag"],
     interpretMarkup: (node) => {
-      return "\n".repeat((node.text.match(/\n/g) || []).length);
+      if (node.type == "end_tag") {
+        return "\n".repeat((node.text.match(/\n/g) || []).length);
+      } else {
+        return "";
+      }
     },
     inSourceGrammars: [Markdown.inline],
     inSourceNodeType: "inline",
@@ -41,10 +49,11 @@ export function getNodesFromSource(
   const parser = new Parser();
   parser.setLanguage(languageConfig.grammar);
   const tree = parser.parse(text);
+  let maxEndIndex: number = 0;
 
   function parseNode(node: SyntaxNode) {
-    if (node.previousSibling) {
-      if (node.previousSibling.endPosition.row != node.startPosition.row) {
+    if (node.previousSibling != null) {
+      if (node.previousSibling.endPosition.row < node.startPosition.row) {
         const lfBuffer: IAnnotation = {
           text: "\n",
           offset: {
@@ -52,32 +61,53 @@ export function getNodesFromSource(
             end: node.startIndex,
           },
         };
+        maxEndIndex = node.startIndex;
         annotations.push(lfBuffer);
       }
     }
+    const spaces: string =
+      node.startIndex > maxEndIndex
+        ? " ".repeat(node.startIndex - maxEndIndex)
+        : "";
     if (languageConfig.textTypes.includes(node.type)) {
       const annotatedtext: IAnnotation = {
-        text: node.text,
+        text: `${spaces}${node.text}`,
         offset: {
           start: node.startIndex,
           end: node.endIndex,
         },
       };
+      maxEndIndex = node.endIndex;
       annotations.push(annotatedtext);
     } else if (
       includeMarkup &&
       languageConfig.markupTypes.includes(node.type)
     ) {
       const annotatedmarkup: IAnnotation = {
-        interpretAs: languageConfig.interpretMarkup(node),
-        markup: node.text,
+        interpretAs: `${spaces}${languageConfig.interpretMarkup(node)}`,
+        markup: `${spaces}${node.text}`,
         offset: {
           start: node.startIndex,
           end: node.endIndex,
         },
       };
+      maxEndIndex = node.endIndex;
       annotations.push(annotatedmarkup);
     }
+
+    // if (languageConfig.inSourceGrammars) {
+    //   languageConfig.inSourceGrammars.forEach((grammar: Language) => {
+    //     const annotatedmarkup: IAnnotation = {
+    //       interpretAs: grammar.toString(),
+    //       markup: node.text,
+    //       offset: {
+    //         start: node.startIndex,
+    //         end: node.endIndex,
+    //       },
+    //     };
+    //     annotations.push(annotatedmarkup);
+    //   });
+    // }
     node.children.forEach((child) => {
       parseNode(child);
     });

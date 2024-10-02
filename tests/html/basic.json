@@ -152,15 +152,15 @@
       }
     },
     {
-      "text": "is an",
+      "text": " is an",
       "offset": {
         "start": 398,
         "end": 403
       }
     },
     {
-      "interpretAs": "",
-      "markup": "<strong>",
+      "interpretAs": " ",
+      "markup": " <strong>",
       "offset": {
         "start": 404,
         "end": 412
@@ -182,15 +182,15 @@
       }
     },
     {
-      "text": "open source spell and grammar checker. It’s being integrated into more and more IDEs so that developers can leverage it alongside their other tools. However, LanguageTool’s creator has explicitly stated,",
+      "text": " open source spell and grammar checker. It’s being integrated into more and more IDEs so that developers can leverage it alongside their other tools. However, LanguageTool’s creator has explicitly stated,",
       "offset": {
         "start": 431,
         "end": 634
       }
     },
     {
-      "interpretAs": "",
-      "markup": "<a href=\"https://forum.languagetool.org/t/rules-for-markdown/374/2\">",
+      "interpretAs": " ",
+      "markup": " <a href=\"https://forum.languagetool.org/t/rules-for-markdown/374/2\">",
       "offset": {
         "start": 635,
         "end": 703
@@ -212,7 +212,7 @@
       }
     },
     {
-      "text": "Pretty clear.",
+      "text": " Pretty clear.",
       "offset": {
         "start": 832,
         "end": 845
@@ -489,8 +489,8 @@
       }
     },
     {
-      "interpretAs": "",
-      "markup": "<a href=\"https://www.brainyquote.com/quotes/socrates_125872\">",
+      "interpretAs": " ",
+      "markup": " <a href=\"https://www.brainyquote.com/quotes/socrates_125872\">",
       "offset": {
         "start": 1473,
         "end": 1534

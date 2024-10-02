@@ -10,10 +10,10 @@ describe("#Html()", function () {
     );
     const text = fs.readFileSync("./tests/html/basic.html", "utf8");
     const result = annotatedSitter.getNodesFromSource("html", text);
-    fs.writeFileSync(
-      "./out/html-basic.json",
-      JSON.stringify(result, null, 2),
-    );
+    // fs.writeFileSync(
+    //   "./out/html-basic.json",
+    //   JSON.stringify(result, null, 2),
+    // );
     chai.expect(result).to.deep.equal(expected);
   });
 
@@ -26,10 +26,10 @@ describe("#Html()", function () {
       const text = node.text ? node.text : node.markup;
       result += text;
     }
-    fs.writeFileSync(
-      "./out/html-basic.html",
-      result,
-    );
+    // fs.writeFileSync(
+    //   "./out/html-basic.html",
+    //   result,
+    // );
     chai.expect(result).to.equal(expected);
   });
 
@@ -39,10 +39,10 @@ describe("#Html()", function () {
     );
     const text = fs.readFileSync("./tests/html/backslashes.html", "utf8");
     const result = annotatedSitter.getNodesFromSource("html", text);
-    fs.writeFileSync(
-      "./out/html-backslashes.json",
-      JSON.stringify(result, null, 2),
-    );
+    // fs.writeFileSync(
+    //   "./out/html-backslashes.json",
+    //   JSON.stringify(result, null, 2),
+    // );
     chai.expect(result).to.deep.equal(expected);
   });
 
@@ -55,10 +55,10 @@ describe("#Html()", function () {
       const text = node.text ? node.text : node.markup;
       result += text;
     }
-    fs.writeFileSync(
-      "./out/html-backslashes.html",
-      result,
-    );
+    // fs.writeFileSync(
+    //   "./out/html-backslashes.html",
+    //   result,
+    // );
     chai.expect(result).to.equal(expected);
   });
 });
